@@ -49,6 +49,11 @@ th, td {
     cursor: pointer;
     float: right;
 }
+.fa-trash{
+    color: red;
+    cursor: pointer;
+    float: right;
+}
 .fa-star.marked{
     color: #62cf60;
     opacity: 1;

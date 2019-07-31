@@ -7,13 +7,13 @@ window.onload = () => {
     const tabUSD = document.getElementsByClassName('tab-usd')[0];
     const tabFavorite = document.getElementsByClassName('tab-favorite')[0];
     const markFavorite = document.getElementsByClassName('mark-favorite');
+    const removeFav = document.getElementsByClassName('remove-fav');
     const sortArrows = document.getElementsByClassName('sort');
 
     let markets = {};
     let currencies = {};
     let usdData = {};
-    // let favoriteData = localStorage.getItem('favorites') || [];
-    let favoriteData = [];
+    let favoriteData = JSON.parse(localStorage.getItem('favorites')) || [];
 
     tabUSD.classList.add('selected');
 
@@ -32,6 +32,13 @@ window.onload = () => {
         else {
             dataPreview.style.display = 'table-row-group';
             usdData = getData(markets, currencies);
+            usdData.forEach((usdItem)=>{
+                favoriteData.map((favItem) => {
+                    if(usdItem.currency_code === favItem.currency_code){
+                        usdItem.marked = favItem.marked;
+                    }
+                });
+            });
             drawData(usdData, 'price', false);
         }
     }).catch((err) => {
@@ -57,10 +64,8 @@ window.onload = () => {
         return finalData;
     };
 
-    let drawData = (data, sort, acc) => {
-        if(data.length == 0){
-            dataAbsent.style.display = 'table-row-group';
-        }
+    let drawData = (data, sort, acc, showTrash) => {
+        dataAbsent.style.display = data.length > 0 ? 'none': 'table-row-group';
         let sortedData = [];
         dataPreview.innerHTML = '';
 
@@ -72,27 +77,38 @@ window.onload = () => {
         }
 
         for(let i=0;i<sortedData.length;i++){
+            sortedData[i].marked = sortedData[i].marked === undefined ? '' : sortedData[i].marked;
             dataPreview.innerHTML +=
                 `<tr>` +
                 `<td>${sortedData[i].currency_code}</td>` +
                 `<td>${sortedData[i].currency_name}</td>` +
                 `<td>${sortedData[i].volume} ${sortedData[i].currency_code}</td>` +
-                `<td>${sortedData[i].price} <i class="fa mark-favorite fa-star ${sortedData[i].marked}"></i></td>` +
+                `<td>${sortedData[i].price} ${showTrash ? '<i class="fa remove-fav fa-trash"></i>'
+                                                        : '<i class="fa mark-favorite fa-star '+ sortedData[i].marked +'"></i>'}</td>` +
                 `</tr>`;
         }
         sortedData.forEach((item, index) => {
-            markFavorite[index].addEventListener('click', function(){
-                if(this.className.includes('marked')) {
-                    this.classList.remove('marked');
+            if(!showTrash) {
+                markFavorite[index].addEventListener('click', function () {
+                    if (this.className.includes('marked')) {
+                        this.classList.remove('marked');
+                        sortedData[index].marked = '';
+                        favoriteData.splice(favoriteData.indexOf(item), 1)
+                    } else {
+                        this.classList.add('marked');
+                        sortedData[index].marked = 'marked';
+                        favoriteData.push(item);
+                    }
+                    localStorage.setItem('favorites', JSON.stringify(favoriteData))
+                });
+            } else{
+                removeFav[index].addEventListener('click', function () {
                     sortedData[index].marked = '';
-                    favoriteData.splice(favoriteData.indexOf(item), 1)
-                } else{
-                    this.classList.add('marked');
-                    sortedData[index].marked = 'marked';
-                    favoriteData.push(item);
-                }
-                localStorage.setItem('favorites', favoriteData)
-            })
+                    favoriteData.splice(favoriteData.indexOf(item), 1);
+                    localStorage.setItem('favorites', JSON.stringify(favoriteData));
+                    drawData(favoriteData, 'price', false, true);
+                });
+            }
         })
 
     };
@@ -106,7 +122,7 @@ window.onload = () => {
     tabFavorite.addEventListener('click', () => {
         tabFavorite.classList.add('selected');
         tabUSD.classList.remove('selected');
-        drawData(favoriteData, 'price', false);
+        drawData(favoriteData, 'price', false, true);
     });
 
     for(let i=0;i<sortArrows.length;i++){
@@ -115,7 +131,7 @@ window.onload = () => {
                 if(tabUSD.className.includes('selected')) {
                     drawData(usdData, this.getAttribute('sort-by'), false);
                 } else{
-                    drawData(favoriteData, this.getAttribute('sort-by'), false);
+                    drawData(favoriteData, this.getAttribute('sort-by'), false, true);
                 }
                 this.classList.remove('fa-arrow-circle-up');
                 this.classList.add('fa-arrow-circle-down');
@@ -123,7 +139,7 @@ window.onload = () => {
                 if(tabUSD.className.includes('selected')) {
                     drawData(usdData, this.getAttribute('sort-by'), true);
                 } else{
-                    drawData(favoriteData, this.getAttribute('sort-by'), true);
+                    drawData(favoriteData, this.getAttribute('sort-by'), true, true);
                 }
                 this.classList.remove('fa-arrow-circle-down');
                 this.classList.add('fa-arrow-circle-up');
