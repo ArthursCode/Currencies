@@ -1,5 +1,6 @@
 window.onload = () => {
 
+    // variable declaration
     const getMarkets = fetch("https://exchange-test-app.herokuapp.com/market");
     const getCurrencies = fetch("https://exchange-test-app.herokuapp.com/currencies");
     const dataPreview = document.getElementsByClassName('data-preview')[0];
@@ -10,13 +11,17 @@ window.onload = () => {
     const removeFav = document.getElementsByClassName('remove-fav');
     const sortArrows = document.getElementsByClassName('sort');
 
+    // global variables
     let markets = {};
     let currencies = {};
     let usdData = {};
     let favoriteData = JSON.parse(localStorage.getItem('favorites')) || [];
 
+
+    // show USD Tab first
     tabUSD.classList.add('selected');
 
+    // wait for all requests to finish
     Promise.all([getMarkets, getCurrencies]).then(async([markets, currencies]) => {
         const marketList = await markets.json();
         const currencyList = await currencies.json();
@@ -47,6 +52,7 @@ window.onload = () => {
     });
 
 
+    // combine two data from markets and currencies by currency id
     let getData = (markets, currencies) => {
         const finalData = [];
         for (let i = 0; i < markets.length; i++) {
@@ -64,6 +70,8 @@ window.onload = () => {
         return finalData;
     };
 
+
+    // draw data for both usd and favorite tabs by setting default sorting (price desc)
     let drawData = (data, sort, acc, showTrash) => {
         dataAbsent.style.display = data.length > 0 ? 'none': 'table-row-group';
         let sortedData = [];
@@ -113,18 +121,22 @@ window.onload = () => {
 
     };
 
+    // listeners for changing tab
     tabUSD.addEventListener('click', () => {
         tabUSD.classList.add('selected');
         tabFavorite.classList.remove('selected');
         drawData(usdData, 'price', false);
+        initSortArrows();
     });
 
     tabFavorite.addEventListener('click', () => {
         tabFavorite.classList.add('selected');
         tabUSD.classList.remove('selected');
         drawData(favoriteData, 'price', false, true);
+        initSortArrows();
     });
 
+    // listeners for changing sorting
     for(let i=0;i<sortArrows.length;i++){
         sortArrows[i].addEventListener('click', function() {
             if(this.className.includes('fa-arrow-circle-up')) {
@@ -145,5 +157,18 @@ window.onload = () => {
                 this.classList.add('fa-arrow-circle-up');
             }
         });
+    }
+
+    // init sorting arrows after changing tab
+    let initSortArrows = () => {
+        for(let i=0;i<sortArrows.length;i++){
+            if(i !== sortArrows.length-1){
+                sortArrows[i].classList.remove('fa-arrow-circle-down');
+                sortArrows[i].classList.add('fa-arrow-circle-up');
+            } else{
+                sortArrows[i].classList.remove('fa-arrow-circle-up');
+                sortArrows[i].classList.add('fa-arrow-circle-down');
+            }
+        }
     }
 };
