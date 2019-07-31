@@ -96,7 +96,18 @@ window.onload = () => {
                 `</tr>`;
         }
         sortedData.forEach((item, index) => {
-            if(!showTrash) {
+            if(showTrash) {
+                removeFav[index].addEventListener('click', function () {
+                    sortedData[index].marked = '';
+                    function getKeyByValue(object, value) {
+                        return Object.keys(object).find(key => object[key].currency_code === value.currency_code);
+                    }
+                    usdData[getKeyByValue(usdData,item)].marked = '';
+                    favoriteData.splice(favoriteData.indexOf(item), 1);
+                    localStorage.setItem('favorites', JSON.stringify(favoriteData));
+                    drawData(favoriteData, 'price', false, true);
+                });
+            } else{
                 markFavorite[index].addEventListener('click', function () {
                     if (this.className.includes('marked')) {
                         this.classList.remove('marked');
@@ -108,13 +119,6 @@ window.onload = () => {
                         favoriteData.push(item);
                     }
                     localStorage.setItem('favorites', JSON.stringify(favoriteData))
-                });
-            } else{
-                removeFav[index].addEventListener('click', function () {
-                    sortedData[index].marked = '';
-                    favoriteData.splice(favoriteData.indexOf(item), 1);
-                    localStorage.setItem('favorites', JSON.stringify(favoriteData));
-                    drawData(favoriteData, 'price', false, true);
                 });
             }
         })
