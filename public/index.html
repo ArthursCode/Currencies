@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>USD Exchange</title>
+    <link rel="shortcut icon" type="image/png" href="images/favicon.ico"/>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="../node_modules/font-awesome/css/font-awesome.min.css">
+    <script src="scripts/main.js"></script>
+</head>
+<body>
+
+<div class="exchange-table">
+    <div class="tabs">
+        <div class="tab tab-usd">USD</div>
+        <div class="tab tab-favorite">Favorites</div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Currency code <i sort-by="currency_code" class="fa sort fa-arrow-circle-up" aria-hidden="true"></i></th>
+                <th>Currency name <i sort-by="currency_name" class="fa sort fa-arrow-circle-up" aria-hidden="true"></i></th>
+                <th>Volume        <i sort-by="volume" class="fa sort fa-arrow-circle-up" aria-hidden="true"></i></th>
+                <th>Price         <i sort-by="price" class="fa sort fa-arrow-circle-down" aria-hidden="true"></i></th>
+            </tr>
+        </thead>
+        <tbody class="data-preview"></tbody>
+        <tbody class="data-absent">
+            <tr><td colspan="4">No Data</td></tr>
+        </tbody>
+
+    </table>
+</div>
+
+</body>
+</html>
